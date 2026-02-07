@@ -1,5 +1,3 @@
-# BUG_HUNTER_ENGINE
-BUG-HUNTER: A high- performance hybrid automation framework built with java and Python, optimized for multi-threaded processing on AMD architectures. Designed to bridge the gap between heavy backend processing and agile fronted testing.
 # 🛡️ Bug-Hunter: Hybrid AI-Powered Automation Engine
 
 **Bug-Hunter** is a high-performance automation framework designed to drastically accelerate software testing. By bridging the robust power of **Java** with the agility of **Python**, this engine is specifically optimized for **AMD architectures (Ryzen/EPYC)** to leverage high-core-count multi-threaded execution.
