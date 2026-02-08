@@ -67,13 +67,13 @@ mvn clean install
 
 ## (Team Members)
 
-Member: Mohd Irteza
+### Member: Mohd Irteza
 
-Member: Vishal Kumar
+### Member: Vishal Kumar
 
 
 
-📄 License
+##📄 License
 This project is licensed under the MIT License.
 
 Built with ❤️ for the AMD Hackathon by Team The Light Squad.
