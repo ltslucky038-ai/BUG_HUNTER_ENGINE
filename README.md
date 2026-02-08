@@ -73,7 +73,7 @@ mvn clean install
 
 
 
-##📄 License
+📄 License
 This project is licensed under the MIT License.
 
 Built with ❤️ for the AMD Hackathon by Team The Light Squad.
