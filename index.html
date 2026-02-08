@@ -1,11 +1,33 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>
-            BUG HUNTER
-        </title>
-    </head>
-    <body>
-        <p> the last kingdom</p>
-    </body>
+<html lang="en">
+<head>
+    
+  <meta charset="UTF-8">
+  <title>BUG-HUNTER | Report Bug</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+    <h1> Bug Report Form</h1>
+    <p class="subtitle">Report bugs easily to improve software quality</p>
+
+    <form id="bugForm">
+      <label>Bug Title</label>
+      <input type="text" id="title" placeholder="Enter bug title" required>
+
+      <label>Bug Description</label>
+      <textarea id="description" placeholder="Describe the bug in detail" required></textarea>
+
+      <label>Follow these steps to remove the Bug</label>
+      <textarea id="steps" placeholder="1. Step one&#10;2. Step two&#10;3. Step three" required></textarea>
+
+      <button type="submit">Submit Bug</button>
+    </form>
+
+    <p id="status"></p>
+  </div>
+
+  <script src="script.js"></script>
+</body>
 </html>
