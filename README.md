@@ -63,9 +63,9 @@ mvn clean install
 
 # 👥  The Light Squad QA Architects (Team)
 
-### Team Leader: [Lucky Tomar]
+## Team Leader: [Lucky Tomar]
 
-##(Team Members)
+## (Team Members)
 
 Member: Mohd Irteza
 
