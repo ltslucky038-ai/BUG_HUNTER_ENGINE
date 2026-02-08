@@ -61,9 +61,9 @@ pip install selenium webdriver-manager
 3.Compiled java backend
 mvn clean install
 
-👥 Light Squad 
+# 👥  The Light Squad QA Architects (Team)
 
-##Team Leader: [Lucky Tomar]
+### Team Leader: [Lucky Tomar]
 
 ##(Team Members)
 
