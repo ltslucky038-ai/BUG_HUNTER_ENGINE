@@ -1,75 +1,87 @@
-import time
-import json
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
+import requests
+from bs4 import BeautifulSoup
 
 class WebScanner:
-    def __init__(self):
-        # --- WEB DRIVER PART ---
-        print("Driver setup ho raha hai...")
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")  # Background mein chalega
-        chrome_options.add_argument("--no-sandbox")
-        
-        service = Service(ChromeDriverManager().install())
-        self.driver = webdriver.Chrome(service=service, options=chrome_options)
-        self.found_bugs = []
 
-    def scan_page(self, url):
-        # --- WEB SCANNER PART ---
-        print(f"Scanning shuru ho rahi hai: {url}")
+    def __init__(self, url):
+        self.url = url
+        self.vulnerabilities = []
+
+        # Severity weights (AI-like scoring)
+        self.severity_weights = {
+            "SQL Injection": 10,
+            "XSS": 8,
+            "Hardcoded Password": 9,
+            "Insecure Endpoint": 6
+        }
+
+    def scan(self):
         try:
-            self.driver.get(url)
-            time.sleep(3) # Page load hone ka wait
+            response = requests.get(self.url)
+            soup = BeautifulSoup(response.text, "html.parser")
+            page_content = response.text
 
-            # 1. Broken Links Check Karna
-            links = self.driver.find_elements(By.TAG_NAME, "a")
-            for link in links:
-                href = link.get_attribute("href")
-                if not href or "javascript" in href:
-                    self.found_bugs.append({"type": "Broken Link", "detail": f"Empty href found at {url}"})
+            self.detect_sql_injection(page_content)
+            self.detect_xss(page_content)
+            self.detect_hardcoded_password(page_content)
 
-            # 2. Form Input Issues Check Karna
-            inputs = self.driver.find_elements(By.TAG_NAME, "input")
-            for i in inputs:
-                if not i.get_attribute("id") and not i.get_attribute("name"):
-                    self.found_bugs.append({"type": "UI Bug", "detail": "Input field missing ID or Name attribute"})
+            self.remove_duplicates()
 
-            # 3. Image Alt Text Check Karna (SEO/Accessibility bug)
-            images = self.driver.find_elements(By.TAG_NAME, "img")
-            for img in images:
-                if not img.get_attribute("alt"):
-                    self.found_bugs.append({"type": "Accessibility", "detail": f"Image missing Alt text: {img.get_attribute('src')}"})
-
-            print(f"Scan complete! {len(self.found_bugs)} bugs mile hain.")
-            return self.found_bugs
+            return self.vulnerabilities
 
         except Exception as e:
-            print(f"Scanning error: {e}")
+            print("Scan Error:", e)
             return []
 
-    def save_report(self):
-        """Milne waale bugs ko JSON file mein save karna"""
-        # Hum is report ko 'frontend/public/data' mein save karenge
-        report_path = "frontend/public/data/scan_report.json"
-        
-        # Folder check
-        import os
-        os.makedirs(os.path.dirname(report_path), exist_ok=True)
-        
-        with open(report_path, "w") as f:
-            json.dump(self.found_bugs, f, indent=4)
-        print(f"Report save ho gayi: {report_path}")
+    # -------------------------
+    # Detection Methods
+    # -------------------------
 
-    def close(self):
-        self.driver.quit()
+    def detect_sql_injection(self, content):
+        if "SELECT" in content.upper() or "DROP TABLE" in content.upper():
+            self.add_vulnerability("SQL Injection", "Potential SQL query exposed")
 
-if __name__ == "__main__":
-    scanner = WebScanner()
-    # Test ke liye localhost ya kisi site ko scan karein
-    scanner.scan_page("http://localhost:3000") 
-    scanner.save_report()
-    scanner.close()
+    def detect_xss(self, content):
+        if "<script>" in content.lower():
+            self.add_vulnerability("XSS", "Script tag detected in page")
+
+    def detect_hardcoded_password(self, content):
+        if "password=" in content.lower():
+            self.add_vulnerability("Hardcoded Password", "Password found in source")
+
+    # -------------------------
+    # Helper Methods
+    # -------------------------
+
+    def add_vulnerability(self, vuln_type, description):
+        weight = self.severity_weights.get(vuln_type, 5)
+
+        vulnerability = {
+            "title": vuln_type,
+            "description": description,
+            "risk_score": weight,
+            "confidence": f"{min(weight * 10, 95)}%",
+            "severity": self.calculate_severity(weight)
+        }
+
+        self.vulnerabilities.append(vulnerability)
+
+    def calculate_severity(self, score):
+        if score >= 9:
+            return "Critical"
+        elif score >= 7:
+            return "Warning"
+        else:
+            return "Info"
+
+    def remove_duplicates(self):
+        unique = []
+        seen = set()
+
+        for vuln in self.vulnerabilities:
+            key = vuln["title"] + vuln["description"]
+            if key not in seen:
+                seen.add(key)
+                unique.append(vuln)
+
+        self.vulnerabilities = unique
