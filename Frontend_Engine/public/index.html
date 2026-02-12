@@ -1,29 +1,348 @@
-<!-- 
-npx create-react-app my-frontend-app
-press 'y' and after press enter
-cd my-frontend-app
-npm install lucide-react tailwindcss postcss autoprefixer
-npx tailwindcss init -p
-npm start -->
 <!DOCTYPE html>
-<html lang ="en">
-    <head>
-        <meta charset = "utf-8"/>
-        <link rel="icon" href = "%PUBLIC_URL%/favicon.ico"/>
-        <meta name ="viewport"
-        content = "width=device-width, initial-scal=1"/>
-        <meta name ="theme-color" content="#0f172a"/>
-        <meta name ="description" content="Bug Hunter pro-Static Code Ananlysis Dashboard"/>
-        <title>Bug Hunter Pro | Dashboard</title>
-        <link rel ="preconnect" href = "http://fonts.googleapis.com">
-        <link rel ="preconnect" href = "http://fonts.gstatic.com"crossorigin>
-        <link rel ="preconnect" href = "http://fonts.googleapis.com/css2?family=inter:wght@400'600;700&display=swap" rel = "stylesheet">
-    </head>
-    <body class ="bg-[#0f172a]">
-        <noscript> You need to enable JavaScript to run this app.</noscript>
-        <div id = "root"></div>
-    </body>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bug Hunter Pro | Cyber Security Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #020617; color: #f8fafc; overflow-x: hidden; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.5); }
+        .sidebar-active { background: linear-gradient(90deg, rgba(37, 99, 235, 0.2) 0%, rgba(37, 99, 235, 0) 100%); border-left: 4px solid #2563eb; }
+        .scan-anim { animation: scan 2s linear infinite; }
+        @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #020617; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+    </style>
+</head>
+<body class="h-screen flex">
+
+    <!-- --- SIDEBAR --- -->
+    <aside class="w-64 glass h-full flex flex-col p-6 hidden lg:flex">
+        <div class="flex items-center gap-3 mb-10">
+            <div class="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-500/20">
+                <i data-lucide="shield-check" class="text-white"></i>
+            </div>
+            <h1 class="font-black text-xl tracking-tighter italic uppercase text-white">BH PRO</h1>
+        </div>
+
+        <nav class="space-y-4 flex-1">
+            <a href="#" onclick="switchTab('dashboard')" class="nav-link flex items-center gap-3 p-3 rounded-xl text-slate-400 hover:text-white transition-all sidebar-active" id="nav-dashboard">
+                <i data-lucide="layout-dashboard" class="w-5 h-5"></i> <span class="text-sm font-semibold">Dashboard</span>
+            </a>
+            <a href="#" onclick="switchTab('ai-scanner')" class="nav-link flex items-center gap-3 p-3 rounded-xl text-slate-400 hover:text-white transition-all" id="nav-ai">
+                <i data-lucide="cpu" class="w-5 h-5"></i> <span class="text-sm font-semibold">AI Auditor</span>
+            </a>
+            <a href="#" onclick="switchTab('terminal')" class="nav-link flex items-center gap-3 p-3 rounded-xl text-slate-400 hover:text-white transition-all" id="nav-terminal">
+                <i data-lucide="terminal" class="w-5 h-5"></i> <span class="text-sm font-semibold">Live Console</span>
+            </a>
+            <a href="#" class="flex items-center gap-3 p-3 rounded-xl text-slate-400 hover:text-white transition-all">
+                <i data-lucide="history" class="w-5 h-5"></i> <span class="text-sm font-semibold">History</span>
+            </a>
+        </nav>
+
+        <div class="bg-blue-600/10 border border-blue-500/20 p-4 rounded-2xl">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">AI Power</span>
+                <span class="text-[10px] font-bold text-blue-300">80%</span>
+            </div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full">
+                <div class="bg-blue-500 h-full w-[80%] rounded-full shadow-[0_0_10px_#3b82f6]"></div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- --- MAIN CONTENT --- -->
+    <main class="flex-1 overflow-y-auto p-6 md:p-10">
+        
+        <!-- Top Navigation -->
+        <header class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+            <div>
+                <h2 id="page-title" class="text-3xl font-black text-white tracking-tight">System Overview</h2>
+                <p class="text-slate-500 text-sm mt-1">Status: <span class="text-green-500 font-bold uppercase tracking-tighter text-[11px]">Online & Protecting</span></p>
+            </div>
+            
+            <div class="flex items-center gap-4 w-full md:w-auto">
+                <div class="glass flex items-center px-4 py-2 rounded-2xl w-full md:w-80">
+                    <i data-lucide="search" class="w-4 h-4 text-slate-500 mr-2"></i>
+                    <input type="text" id="target-input" placeholder="Enter target URL or IP..." class="bg-transparent border-none outline-none text-sm w-full text-slate-200">
+                </div>
+                <button onclick="startScan()" id="scan-btn" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-600/20 transition-all active:scale-95">
+                    Scan
+                </button>
+            </div>
+        </header>
+
+        <!-- DASHBOARD TAB -->
+        <div id="dashboard-tab" class="space-y-8 animate-fade-in">
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="glass p-6 rounded-[2rem]">
+                    <div class="flex justify-between items-start mb-4">
+                        <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">Total Scans</p>
+                        <i data-lucide="activity" class="text-blue-500 w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-3xl font-black text-white">1,284</h3>
+                </div>
+                <div class="glass p-6 rounded-[2rem]">
+                    <div class="flex justify-between items-start mb-4">
+                        <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">Bugs Found</p>
+                        <i data-lucide="bug" class="text-yellow-500 w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-3xl font-black text-white" id="bug-count">0</h3>
+                </div>
+                <div class="glass p-6 rounded-[2rem] border-red-500/20">
+                    <div class="flex justify-between items-start mb-4">
+                        <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">Critical</p>
+                        <i data-lucide="alert-triangle" class="text-red-500 w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-3xl font-black text-white">0</h3>
+                </div>
+                <div class="glass p-6 rounded-[2rem]">
+                    <div class="flex justify-between items-start mb-4">
+                        <p class="text-slate-500 text-[10px] font-black uppercase tracking-widest">Efficiency</p>
+                        <i data-lucide="zap" class="text-green-500 w-5 h-5"></i>
+                    </div>
+                    <h3 class="text-3xl font-black text-white">99.2%</h3>
+                </div>
+            </div>
+
+            <!-- Main Log Table -->
+            <div class="glass rounded-[2rem] overflow-hidden">
+                <div class="p-6 border-b border-slate-800 flex justify-between items-center">
+                    <h3 class="text-sm font-black uppercase tracking-widest text-slate-400">Security Audit Logs</h3>
+                    <div class="flex gap-2">
+                        <span class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></span>
+                        <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Live Feed</span>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-black/20 text-slate-500 text-[10px] font-black uppercase tracking-widest">
+                            <tr>
+                                <th class="px-8 py-4">Vulnerability Name</th>
+                                <th class="px-6 py-4">Severity</th>
+                                <th class="px-6 py-4">Location</th>
+                                <th class="px-6 py-4 text-right">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vuln-body" class="divide-y divide-slate-800/50">
+                            <!-- Rows will be added via JS -->
+                            <tr>
+                                <td colspan="4" class="px-8 py-20 text-center text-slate-600 italic">No scans performed yet...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI AUDITOR TAB -->
+        <div id="ai-tab" class="hidden grid grid-cols-1 lg:grid-cols-2 gap-8 animate-fade-in">
+            <div class="glass rounded-[2.5rem] p-8 flex flex-col">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xs font-black uppercase tracking-widest text-indigo-400">Source Code Input</h3>
+                    <span class="bg-indigo-500/10 text-indigo-400 text-[10px] font-bold px-3 py-1 rounded-full border border-indigo-500/20 uppercase">Pro Engine</span>
+                </div>
+                <textarea id="ai-input" class="flex-1 w-full bg-black/40 border border-slate-800 rounded-3xl p-6 mono text-xs text-indigo-100 outline-none focus:border-indigo-500/50 resize-none min-h-[400px]" placeholder="// Paste your Java or Python code here for deep AI audit..."></textarea>
+                <button onclick="runAiAudit()" class="w-full mt-6 bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-lg shadow-indigo-600/20 transition-all flex items-center justify-center gap-2">
+                    <i data-lucide="zap" class="w-4 h-4"></i> Analyze with AI
+                </button>
+            </div>
+
+            <div class="space-y-6">
+                <div class="glass rounded-[2.5rem] p-8 h-full min-h-[500px]">
+                    <h3 class="text-xs font-black uppercase tracking-widest text-green-400 mb-6 flex items-center gap-2">
+                        <i data-lucide="lightbulb" class="w-4 h-4"></i> AI Insights & Fixes
+                    </h3>
+                    <div id="ai-output" class="flex flex-col items-center justify-center h-[80%] text-center text-slate-600">
+                        <i data-lucide="cpu" class="w-12 h-12 mb-4 opacity-20"></i>
+                        <p class="text-xs font-bold uppercase tracking-widest">Waiting for input...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TERMINAL TAB -->
+        <div id="terminal-tab" class="hidden animate-fade-in">
+            <div class="bg-black border border-slate-800 rounded-3xl overflow-hidden shadow-2xl h-[600px] flex flex-col">
+                <div class="bg-slate-900 px-6 py-3 flex items-center gap-2 border-b border-slate-800">
+                    <div class="flex gap-1.5">
+                        <div class="w-3 h-3 bg-red-500/20 rounded-full"></div>
+                        <div class="w-3 h-3 bg-yellow-500/20 rounded-full"></div>
+                        <div class="w-3 h-3 bg-green-500/20 rounded-full"></div>
+                    </div>
+                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest ml-4">bughunter-console ~ zsh</span>
+                </div>
+                <div id="terminal-content" class="p-6 flex-1 overflow-y-auto mono text-xs text-green-500 leading-relaxed">
+                    <p class="mb-1 text-slate-500 italic">Initializing BH-PRO Security Console...</p>
+                    <p class="mb-4 text-slate-500 italic">Type 'help' for available commands.</p>
+                    <div id="log-container"></div>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span class="text-blue-500">➜</span>
+                        <input type="text" id="term-input" class="bg-transparent border-none outline-none flex-1 text-slate-200" autocomplete="off">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- UI Overlay for scanning -->
+    <div id="scan-overlay" class="fixed inset-0 bg-black/80 z-50 flex flex-col items-center justify-center hidden backdrop-blur-sm">
+        <div class="relative w-24 h-24 mb-6">
+            <div class="absolute inset-0 border-4 border-blue-500/20 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-t-blue-500 rounded-full animate-spin"></div>
+            <i data-lucide="shield" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-blue-500 w-8 h-8 animate-pulse"></i>
+        </div>
+        <h2 class="text-white font-black text-xl uppercase tracking-widest mb-2">Scanning Target...</h2>
+        <p id="scan-status" class="text-slate-500 mono text-xs">Accessing system files...</p>
+    </div>
+
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // --- NAVIGATION LOGIC ---
+        function switchTab(tabId) {
+            const tabs = ['dashboard', 'ai', 'terminal'];
+            tabs.forEach(t => {
+                document.getElementById(t + '-tab').classList.add('hidden');
+                document.getElementById('nav-' + (t === 'ai' ? 'ai' : t)).classList.remove('sidebar-active');
+            });
+
+            document.getElementById(tabId + '-tab').classList.remove('hidden');
+            document.getElementById('nav-' + (tabId === 'ai' ? 'ai' : tabId)).classList.add('sidebar-active');
+            
+            const titles = { 'dashboard': 'System Overview', 'ai-scanner': 'AI Code Auditor', 'terminal': 'Developer Console' };
+            document.getElementById('page-title').innerText = titles[tabId] || 'AI Auditor';
+        }
+
+        // --- SCANNING LOGIC ---
+        function startScan() {
+            const target = document.getElementById('target-input').value;
+            if(!target) {
+                alert("Please enter a target URL!");
+                return;
+            }
+
+            const overlay = document.getElementById('scan-overlay');
+            const statusText = document.getElementById('scan-status');
+            overlay.classList.remove('hidden');
+
+            const steps = ["Enumerating ports...", "Injecting test vectors...", "Analyzing headers...", "Verifying SSL...", "Finalizing report..."];
+            let i = 0;
+            const interval = setInterval(() => {
+                statusText.innerText = steps[i];
+                i++;
+                if(i >= steps.length) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        overlay.classList.add('hidden');
+                        addMockResults();
+                    }, 1000);
+                }
+            }, 1000);
+        }
+
+        function addMockResults() {
+            const body = document.getElementById('vuln-body');
+            body.innerHTML = `
+                <tr class="hover:bg-blue-500/5 transition-all group">
+                    <td class="px-8 py-6">
+                        <p class="font-bold text-slate-200">SQL Injection (Error Based)</p>
+                        <p class="text-[10px] text-slate-500 font-mono italic">CVE-2024-8842</p>
+                    </td>
+                    <td class="px-6 py-6">
+                        <span class="bg-red-500/10 text-red-500 text-[9px] font-black px-3 py-1 rounded-lg border border-red-500/20 uppercase">CRITICAL</span>
+                    </td>
+                    <td class="px-6 py-6 mono text-[11px] text-slate-500 italic">/api/v1/user/auth?id=</td>
+                    <td class="px-6 py-6 text-right">
+                        <button class="text-blue-500 hover:text-white p-2 rounded-xl bg-blue-500/5"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>
+                <tr class="hover:bg-blue-500/5 transition-all group">
+                    <td class="px-8 py-6">
+                        <p class="font-bold text-slate-200">XSS Stored (Comment Section)</p>
+                        <p class="text-[10px] text-slate-500 font-mono italic">CVE-2024-1290</p>
+                    </td>
+                    <td class="px-6 py-6">
+                        <span class="bg-orange-500/10 text-orange-500 text-[9px] font-black px-3 py-1 rounded-lg border border-orange-500/20 uppercase">HIGH</span>
+                    </td>
+                    <td class="px-6 py-6 mono text-[11px] text-slate-500 italic">index.html : Line 452</td>
+                    <td class="px-6 py-6 text-right">
+                        <button class="text-blue-500 hover:text-white p-2 rounded-xl bg-blue-500/5"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                    </td>
+                </tr>
+            `;
+            document.getElementById('bug-count').innerText = "2";
+            lucide.createIcons();
+        }
+
+        // --- AI AUDIT LOGIC ---
+        function runAiAudit() {
+            const code = document.getElementById('ai-input').value;
+            const output = document.getElementById('ai-output');
+            if(!code) return;
+
+            output.innerHTML = `
+                <div class="flex flex-col items-center">
+                    <div class="w-10 h-10 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 animate-pulse">AI is thinking...</p>
+                </div>
+            `;
+
+            setTimeout(() => {
+                output.innerHTML = `
+                    <div class="text-left animate-in fade-in slide-in-from-bottom-2 duration-500">
+                        <div class="bg-red-500/10 border border-red-500/20 p-6 rounded-3xl mb-6">
+                            <h4 class="text-red-500 font-black text-sm uppercase tracking-widest flex items-center gap-2 mb-2">
+                                <i data-lucide="alert-circle" class="w-4 h-4"></i> Critical Bug Found
+                            </h4>
+                            <p class="text-xs text-slate-300 leading-relaxed">Your code uses <code>System.out.println()</code> for sensitive token logging. This can lead to <strong>Log Injection</strong> and data leakage.</p>
+                        </div>
+                        <div class="bg-green-500/10 border border-green-500/20 p-6 rounded-3xl">
+                            <h4 class="text-green-500 font-black text-sm uppercase tracking-widest flex items-center gap-2 mb-2">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i> AI Suggested Fix
+                            </h4>
+                            <div class="bg-black/50 p-4 rounded-xl mono text-[10px] text-green-300">
+                                logger.info("Token verified securely");
+                            </div>
+                        </div>
+                    </div>
+                `;
+                lucide.createIcons();
+            }, 2500);
+        }
+
+        // --- TERMINAL LOGIC ---
+        const termInput = document.getElementById('term-input');
+        const logContainer = document.getElementById('log-container');
+
+        termInput.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') {
+                const cmd = termInput.value;
+                const line = document.createElement('p');
+                line.innerHTML = `<span class="text-blue-500">➜</span> <span class="text-white">${cmd}</span>`;
+                logContainer.appendChild(line);
+                
+                const response = document.createElement('p');
+                response.className = "text-slate-500 mb-2";
+                
+                if(cmd === 'help') response.innerText = "Available: scan, ai-audit, clear, system-info";
+                else if(cmd === 'system-info') response.innerText = "BH-PRO V2.0 | CPU: AI-OPTIMIZED | OS: CYBER-CORE";
+                else if(cmd === 'clear') logContainer.innerHTML = "";
+                else response.innerText = `Command not found: ${cmd}`;
+                
+                logContainer.appendChild(response);
+                termInput.value = "";
+                document.getElementById('terminal-content').scrollTop = document.getElementById('terminal-content').scrollHeight;
+            }
+        });
+    </script>
+</body>
 </html>
-
-
-

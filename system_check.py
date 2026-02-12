@@ -45,7 +45,7 @@ def test_connections():
     
     # JAR file pichle folder ke Java_Engine mein hai
     # '..' matlab BUG_HUNTER_ENGINE folder mein wapas jana
-    java_jar = os.path.join("..", "Java_Engine", "bug_hunter.jar")
+    java_jar = os.path.join("..", "Java_Engine", "bug_hunter")
     
     all_ok = True
     
